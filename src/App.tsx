@@ -14,6 +14,19 @@ import { IntentDetected } from './pages/IntentDetected'
 import { KanbanBoard } from './pages/KanbanBoard'
 import { LoadingPage } from './pages/LoadingPage'
 import { ErrorPage } from './pages/ErrorPage'
+import { NotFoundPage } from './pages/NotFoundPage'
+
+// Hold results back so the dial-up loader gets its moment (and its 90% stall).
+async function withMinDuration<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const [result] = await Promise.all([promise, new Promise((resolve) => setTimeout(resolve, ms))])
+  return result
+}
+
+const NOT_FOUND_TAB: Pick<Tab, 'title' | 'url' | 'content'> = {
+  title: '404 Not Found',
+  url: 'intentnet://404',
+  content: { kind: 'notfound' },
+}
 
 function slugify(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'board'
@@ -58,10 +71,26 @@ export default function App() {
     }))
   }, [])
 
+  // Demo route: visiting /404 directly opens the not-found page (with Minesweeper).
+  useEffect(() => {
+    if (window.location.pathname.replace(/\/+$/, '') === '/404') {
+      window.history.replaceState(null, '', '/')
+      setState((s) => ({
+        ...s,
+        tabs: s.tabs.map((t) => (t.id === s.activeTabId ? { ...t, ...NOT_FOUND_TAB } : t)),
+      }))
+    }
+  }, [])
+
   const navigate = useCallback(
     async (tabId: string, rawQuery: string) => {
       const query = rawQuery.trim()
       if (!query || busy) return
+      if (/^(intentnet:\/\/)?\/?404\/?$/i.test(query)) {
+        updateTab(tabId, { ...NOT_FOUND_TAB })
+        setStatus('Done')
+        return
+      }
       setBusy(true)
       setStatus(`Opening page http://go.intentnet/?q=${encodeURIComponent(query)} ...`)
       updateTab(tabId, {
@@ -70,7 +99,7 @@ export default function App() {
         content: { kind: 'loading', query, stage: 'Contacting the IntentNet Agent...' },
       })
       try {
-        const result = await classify(query)
+        const result = await withMinDuration(classify(query), 5500)
         if (result.type === 'general_search') {
           updateTab(tabId, {
             title: query,
@@ -86,7 +115,7 @@ export default function App() {
             content: { kind: 'loading', query, stage: `Actionable intent detected: "${goal}". Generating your plan...` },
           })
           setStatus('IntentNet Agent is generating your plan...')
-          const boardRes = await generateBoard(goal)
+          const boardRes = await withMinDuration(generateBoard(goal), 3000)
           const board = buildBoard(boardRes, query)
           const boardTab: Tab = {
             id: crypto.randomUUID(),
@@ -210,6 +239,7 @@ export default function App() {
             onSearch={searchFromActiveTab}
             onOpenBoard={openBoard}
             onDeleteBoard={deleteBoard}
+            onOpen404={() => updateTab(tab.id, { ...NOT_FOUND_TAB })}
           />
         )
       case 'loading':
@@ -225,6 +255,8 @@ export default function App() {
       }
       case 'error':
         return <ErrorPage message={c.message} onRetry={c.query ? refresh : undefined} />
+      case 'notfound':
+        return <NotFoundPage />
     }
   }
 
@@ -237,7 +269,7 @@ export default function App() {
           busy={busy}
           onRefresh={refresh}
           onHome={goHome}
-          canRefresh={activeTab.content.kind !== 'home' && activeTab.content.kind !== 'board'}
+          canRefresh={!['home', 'board', 'notfound'].includes(activeTab.content.kind)}
         />
         <AddressBar key={activeTab.id + activeTab.url} url={activeTab.url} onNavigate={searchFromActiveTab} busy={busy} />
         <TabStrip tabs={tabs} activeTabId={activeTab.id} onSelect={activateTab} onClose={closeTab} onNew={openNewTab} />

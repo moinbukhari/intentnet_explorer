@@ -39,6 +39,7 @@ export type TabContent =
   | { kind: 'intent'; goal: string; query: string; boardId: string }
   | { kind: 'board'; boardId: string }
   | { kind: 'error'; message: string; query?: string }
+  | { kind: 'notfound' }
 
 export interface Tab {
   id: string

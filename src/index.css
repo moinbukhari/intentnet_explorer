@@ -415,35 +415,99 @@ body {
   }
 }
 
+.yahoo-top-links {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #777;
+}
+
 .home-logo {
-  margin-top: 22px;
+  margin-top: 14px;
 }
 
-.home-logo-e {
-  display: inline-block;
-  font-family: 'Times New Roman', serif;
-  font-style: italic;
+.yahoo-logo {
+  margin: 0;
+  font-family: 'Times New Roman', 'Georgia', serif;
   font-weight: bold;
-  font-size: 52px;
-  color: #1466c8;
-  text-shadow: 2px 2px 0 #9cc3f5;
-  line-height: 1;
+  font-size: 42px;
+  letter-spacing: -2px;
+  color: #d00000;
+  text-shadow: 2px 2px 0 #f2bcbc;
 }
 
-.home-logo h1 {
-  margin: 4px 0 0;
-  font-size: 26px;
-  letter-spacing: -1px;
-}
-
-.home-logo h1 b {
-  color: #1466c8;
+.yahoo-bang {
+  font-style: italic;
+  color: #a00000;
 }
 
 .home-tagline {
   color: #555;
   margin: 4px 12px 0;
   font-size: 12px;
+}
+
+.yahoo-search-links {
+  font-size: 11px;
+  color: #777;
+  margin: 4px 0 12px;
+}
+
+.yahoo-search-links a {
+  color: #0000cc;
+}
+
+.yahoo-banner {
+  display: block;
+  margin: 10px auto;
+  width: min(560px, calc(100% - 20px));
+  min-height: 44px;
+  padding: 8px 10px;
+  background: #000;
+  color: #ffff00;
+  font-weight: bold;
+  font-size: 12px;
+  border: 3px ridge #ff0000;
+  box-shadow: none;
+  animation: banner-blink 1s steps(2, start) infinite;
+  cursor: pointer;
+}
+
+@keyframes banner-blink {
+  50% {
+    color: #ff00ff;
+    border-color: #ffff00;
+  }
+}
+
+.yahoo-directory {
+  width: min(560px, calc(100% - 20px));
+  margin: 16px auto 0;
+  text-align: left;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px 18px;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+.yahoo-category-name {
+  font-size: 13px;
+}
+
+.yahoo-category-name b {
+  color: #0000cc;
+}
+
+.yahoo-sublinks {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.yahoo-sublinks a {
+  color: #0000cc;
 }
 
 .home-search {
@@ -465,24 +529,6 @@ body {
 .home-search button {
   font-weight: bold;
   min-height: 40px;
-}
-
-.home-examples {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  color: #555;
-  font-size: 12px;
-  padding: 0 12px;
-}
-
-.example-chip {
-  font-size: 12px;
-  padding: 6px 10px;
-  min-width: 0;
-  min-height: 32px;
 }
 
 .home-boards {
@@ -683,24 +729,21 @@ body {
 }
 
 .loading-bar-fill {
-  width: 40%;
   height: 100%;
   background: repeating-linear-gradient(90deg, navy 0 8px, #4a6fd4 8px 10px);
-  animation: slide 1.4s linear infinite;
+  transition: width 0.1s linear;
 }
 
-@keyframes slide {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(650%);
-  }
+.loading-percent {
+  font-size: 12px;
+  font-weight: bold;
+  color: navy;
 }
 
 .loading-hint {
   font-size: 11px;
   color: #999;
+  min-height: 14px;
 }
 
 /* ---- Error page ---- */
@@ -734,6 +777,150 @@ body {
   margin-top: 30px;
   color: #999;
   font-size: 12px;
+}
+
+/* ---- 404 page + Minesweeper ---- */
+.notfound-page {
+  padding: 22px 16px 30px;
+  text-align: center;
+}
+
+.notfound-page h1 {
+  font-size: 20px;
+  font-weight: normal;
+}
+
+.notfound-page p {
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.notfound-hint {
+  color: #555;
+  font-size: 12px;
+}
+
+.notfound-footer {
+  margin-top: 22px;
+  color: #999;
+  font-size: 11px;
+}
+
+.minesweeper {
+  display: inline-block;
+  background: #c0c0c0;
+  border: 3px solid;
+  border-color: #fff #404040 #404040 #fff;
+  padding: 8px;
+  margin-top: 10px;
+}
+
+.ms-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  padding: 4px 6px;
+  margin-bottom: 8px;
+}
+
+.ms-led {
+  background: #000;
+  color: #ff0000;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: 20px;
+  letter-spacing: 2px;
+  padding: 1px 4px;
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+}
+
+.ms-face {
+  min-width: 0;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ms-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 32px);
+  grid-auto-rows: 32px;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+}
+
+.ms-cell {
+  min-width: 0;
+  min-height: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-cell.revealed {
+  background: #bdbdbd;
+  border: 1px solid #9a9a9a;
+  box-shadow: none;
+}
+
+.ms-cell.revealed:active {
+  padding: 0;
+}
+
+.ms-cell.boom {
+  background: #ff4040;
+}
+
+.ms-cell.num-1 { color: #0000ff; }
+.ms-cell.num-2 { color: #008000; }
+.ms-cell.num-3 { color: #ff0000; }
+.ms-cell.num-4 { color: #000080; }
+.ms-cell.num-5 { color: #800000; }
+.ms-cell.num-6 { color: #008080; }
+.ms-cell.num-7 { color: #000000; }
+.ms-cell.num-8 { color: #808080; }
+
+.ms-controls {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ms-flag-toggle {
+  min-width: 0;
+  min-height: 36px;
+  padding: 2px 10px;
+  font-size: 11px;
+}
+
+.ms-flag-toggle.active {
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #b8b8b8;
+  box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.ms-status {
+  font-size: 11px;
+  color: #555;
+  text-align: left;
+  max-width: 180px;
 }
 
 /* ---- Kanban board ---- */
@@ -1008,15 +1195,11 @@ body {
   }
 
   .home-logo {
-    margin-top: 36px;
+    margin-top: 24px;
   }
 
-  .home-logo-e {
-    font-size: 64px;
-  }
-
-  .home-logo h1 {
-    font-size: 34px;
+  .yahoo-logo {
+    font-size: 54px;
   }
 
   .home-tagline {
@@ -1034,10 +1217,9 @@ body {
     min-height: 0;
   }
 
-  .example-chip {
-    font-size: 11px;
-    padding: 2px 8px;
-    min-height: 0;
+  .yahoo-directory,
+  .yahoo-banner {
+    width: min(620px, calc(100% - 20px));
   }
 
   .search-page {
