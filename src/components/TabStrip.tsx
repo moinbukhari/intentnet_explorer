@@ -16,6 +16,7 @@ const TAB_ICONS: Record<Tab['content']['kind'], string> = {
   board: '📋',
   error: '⚠️',
   notfound: '💣',
+  calc: '🧮',
 }
 
 export function TabStrip({ tabs, activeTabId, onSelect, onClose, onNew }: TabStripProps) {

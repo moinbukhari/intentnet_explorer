@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Board } from '../types'
+import { MODELS, getModel } from '../models'
 
 interface HomePageProps {
   boards: Board[]
@@ -7,6 +8,8 @@ interface HomePageProps {
   onOpenBoard: (boardId: string) => void
   onDeleteBoard: (boardId: string) => void
   onOpen404: () => void
+  model: string
+  onModelChange: (id: string) => void
 }
 
 interface DirectoryLink {
@@ -83,8 +86,17 @@ function boardProgress(board: Board): { done: number; total: number } {
   return { done, total: Object.keys(board.cards).length }
 }
 
-export function HomePage({ boards, onSearch, onOpenBoard, onDeleteBoard, onOpen404 }: HomePageProps) {
+export function HomePage({
+  boards,
+  onSearch,
+  onOpenBoard,
+  onDeleteBoard,
+  onOpen404,
+  model,
+  onModelChange,
+}: HomePageProps) {
   const [query, setQuery] = useState('')
+  const selectedModel = getModel(model)
 
   const followLink = (link: DirectoryLink) => {
     if (link.open404) onOpen404()
@@ -127,6 +139,19 @@ export function HomePage({ boards, onSearch, onOpenBoard, onDeleteBoard, onOpen4
         />
         <button type="submit">Search</button>
       </form>
+
+      <div className="model-selector">
+        <label htmlFor="model-select">Answers by:</label>
+        <select id="model-select" value={model} onChange={(e) => onModelChange(e.target.value)}>
+          {MODELS.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.icon} {m.name}
+            </option>
+          ))}
+        </select>
+        <span className="model-catchphrase">"{selectedModel.catchphrase}"</span>
+      </div>
+
       <div className="yahoo-search-links">
         <a
           href="#"

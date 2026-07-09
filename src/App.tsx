@@ -15,6 +15,9 @@ import { KanbanBoard } from './pages/KanbanBoard'
 import { LoadingPage } from './pages/LoadingPage'
 import { ErrorPage } from './pages/ErrorPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { CalcPage } from './pages/CalcPage'
+import { tryEvalMath } from './math'
+import { getModel } from './models'
 
 // Hold results back so the dial-up loader gets its moment (and its 90% stall).
 async function withMinDuration<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -61,8 +64,12 @@ export default function App() {
 
   useEffect(() => saveState(state), [state])
 
-  const { tabs, activeTabId, boards } = state
+  const { tabs, activeTabId, boards, model: modelId } = state
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
+
+  const setModel = useCallback((id: string) => {
+    setState((s) => ({ ...s, model: id }))
+  }, [])
 
   const updateTab = useCallback((tabId: string, patch: Partial<Tab>) => {
     setState((s) => ({
@@ -91,21 +98,39 @@ export default function App() {
         setStatus('Done')
         return
       }
+      // Maths never touches the network: the agent "invokes" calc.exe locally.
+      const math = tryEvalMath(query)
+      if (math) {
+        updateTab(tabId, {
+          title: `${math.expression} = ${math.result}`,
+          url: `intentnet://calc/${encodeURIComponent(query)}`,
+          content: { kind: 'calc', query, expression: math.expression, result: math.result },
+        })
+        setStatus('Tool call complete: calc.exe')
+        return
+      }
+      const model = getModel(modelId)
       setBusy(true)
       setStatus(`Opening page http://go.intentnet/?q=${encodeURIComponent(query)} ...`)
       updateTab(tabId, {
         title: 'Connecting...',
         url: `http://go.intentnet/?q=${encodeURIComponent(query)}`,
-        content: { kind: 'loading', query, stage: 'Contacting the IntentNet Agent...' },
+        content: { kind: 'loading', query, stage: model.loadingLine },
       })
       try {
-        const result = await withMinDuration(classify(query), 5500)
+        const result = await withMinDuration(classify(query, modelId), 5500)
         if (result.type === 'general_search') {
           updateTab(tabId, {
             title: query,
             content: {
               kind: 'search',
-              result: { query, answer: result.answer ?? '', related: result.related ?? [], demo: result.demo },
+              result: {
+                query,
+                answer: result.answer ?? '',
+                related: result.related ?? [],
+                demo: result.demo,
+                model: modelId,
+              },
             },
           })
           setStatus('Done')
@@ -124,6 +149,7 @@ export default function App() {
             content: { kind: 'board', boardId: board.id },
           }
           setState((s) => ({
+            ...s,
             boards: { ...s.boards, [board.id]: board },
             tabs: [
               ...s.tabs.map((t) =>
@@ -147,7 +173,7 @@ export default function App() {
         setBusy(false)
       }
     },
-    [busy, updateTab],
+    [busy, updateTab, modelId],
   )
 
   const searchFromActiveTab = useCallback(
@@ -240,12 +266,20 @@ export default function App() {
             onOpenBoard={openBoard}
             onDeleteBoard={deleteBoard}
             onOpen404={() => updateTab(tab.id, { ...NOT_FOUND_TAB })}
+            model={modelId}
+            onModelChange={setModel}
           />
         )
       case 'loading':
         return <LoadingPage query={c.query} stage={c.stage} />
       case 'search':
-        return <SearchResults result={c.result} onSearch={searchFromActiveTab} />
+        return (
+          <SearchResults
+            result={c.result}
+            onSearch={searchFromActiveTab}
+            onOpen404={() => updateTab(tab.id, { ...NOT_FOUND_TAB })}
+          />
+        )
       case 'intent':
         return <IntentDetected goal={c.goal} query={c.query} onOpenBoard={() => openBoard(c.boardId)} />
       case 'board': {
@@ -257,6 +291,9 @@ export default function App() {
         return <ErrorPage message={c.message} onRetry={c.query ? refresh : undefined} />
       case 'notfound':
         return <NotFoundPage />
+      case 'calc':
+        // Keyed so a new query remounts the calculator with the new result
+        return <CalcPage key={tab.id + c.query} query={c.query} expression={c.expression} result={c.result} />
     }
   }
 
@@ -269,7 +306,7 @@ export default function App() {
           busy={busy}
           onRefresh={refresh}
           onHome={goHome}
-          canRefresh={!['home', 'board', 'notfound'].includes(activeTab.content.kind)}
+          canRefresh={!['home', 'board', 'notfound', 'calc'].includes(activeTab.content.kind)}
         />
         <AddressBar key={activeTab.id + activeTab.url} url={activeTab.url} onNavigate={searchFromActiveTab} busy={busy} />
         <TabStrip tabs={tabs} activeTabId={activeTab.id} onSelect={activateTab} onClose={closeTab} onNew={openNewTab} />

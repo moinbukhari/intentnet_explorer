@@ -30,6 +30,7 @@ export interface SearchResult {
   answer: string
   related: string[]
   demo?: boolean
+  model?: string
 }
 
 export type TabContent =
@@ -40,6 +41,7 @@ export type TabContent =
   | { kind: 'board'; boardId: string }
   | { kind: 'error'; message: string; query?: string }
   | { kind: 'notfound' }
+  | { kind: 'calc'; query: string; expression: string; result: string }
 
 export interface Tab {
   id: string

@@ -70,6 +70,14 @@ async function callJson(system, user) {
   return JSON.parse(completion.choices[0].message.content)
 }
 
+const PERSONA_NOTES = {
+  jeeves: 'When writing the "answer" field, adopt the voice of Ask Jeeves: an impeccably polite English butler.',
+  clippy:
+    'When writing the "answer" field, adopt the voice of Clippy: an overeager assistant. Begin with "It looks like..."',
+  yahoogpt:
+    'When writing the "answer" field, adopt the voice of YahooGPT-2001: breathless turn-of-the-millennium web-portal enthusiasm.',
+}
+
 app.post('/api/classify', async (req, res) => {
   const query = (req.body?.query || '').toString().trim()
   if (!query) return res.status(400).json({ error: 'query is required' })
@@ -78,11 +86,13 @@ app.post('/api/classify', async (req, res) => {
     if (!openai) {
       return res.json({ ...demoClassify(query), demo: true })
     }
+    const persona = PERSONA_NOTES[req.body?.model]
+    const system = persona ? `${CLASSIFY_SYSTEM}\n\n${persona}` : CLASSIFY_SYSTEM
     let result
     try {
-      result = await callJson(CLASSIFY_SYSTEM, query)
+      result = await callJson(system, query)
     } catch {
-      result = await callJson(CLASSIFY_SYSTEM, query) // one retry on malformed JSON / transient error
+      result = await callJson(system, query) // one retry on malformed JSON / transient error
     }
     if (result.type !== 'actionable_intent' && result.type !== 'general_search') {
       throw new Error('bad classification shape')

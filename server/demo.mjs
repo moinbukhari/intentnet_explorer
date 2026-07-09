@@ -30,6 +30,68 @@ function extractGoal(query) {
   return goal.charAt(0).toUpperCase() + goal.slice(1)
 }
 
+// Canned correct answers for the demo queries reachable from the homepage
+// directory, so demo mode gives real information instead of placeholders.
+const KNOWLEDGE_BASE = [
+  {
+    match: /capital of turkey/i,
+    answer:
+      'Ankara is the capital of Turkey. It became the capital in 1923 when the Republic of Turkey was founded — ' +
+      'a common surprise, since Istanbul is the largest and most famous city, but Atatürk chose Ankara for its ' +
+      'central, defensible location in Anatolia.',
+    related: ['what is the capital of Australia', 'largest cities in Turkey', 'why is Istanbul not the capital'],
+  },
+  {
+    match: /invented the telephone/i,
+    answer:
+      'Alexander Graham Bell was awarded the first patent for the telephone in March 1876, and made the famous ' +
+      'first call to his assistant: "Mr. Watson, come here." Italian inventor Antonio Meucci built earlier ' +
+      'voice-communication devices, and in 2002 the US Congress recognised his contribution.',
+    related: ['who invented the internet', 'when was the first phone call', 'Antonio Meucci'],
+  },
+  {
+    match: /is coffee healthy/i,
+    answer:
+      'For most adults, moderate coffee consumption (2-4 cups a day) is considered safe and is associated with ' +
+      'reduced risk of type 2 diabetes, Parkinson\'s and liver disease. The main downsides are sleep disruption ' +
+      'and dependence — and whatever you are doing to it with syrup.',
+    related: ['how much caffeine is too much', 'is tea healthier than coffee', 'does coffee stunt growth'],
+  },
+  {
+    match: /world wide web/i,
+    answer:
+      'The World Wide Web is an information system of pages linked by hypertext, invented by Tim Berners-Lee at ' +
+      'CERN in 1989. It runs on top of the internet — the web is the pages, the internet is the pipes. The first ' +
+      'website went live in 1991 and explained what the web was.',
+    related: ['who invented the internet', 'what was the first website', 'web vs internet difference'],
+  },
+  {
+    match: /y2k/i,
+    answer:
+      'The Y2K bug was a design flaw where computers stored years as two digits, so "00" could be read as 1900 ' +
+      'instead of 2000, threatening date calculations everywhere. After an estimated $300+ billion of global ' +
+      'remediation, midnight passed with only minor glitches — either a triumph of engineering or the best ' +
+      'anticlimax in IT history.',
+    related: ['what is the 2038 problem', 'biggest software bugs in history', 'how was y2k fixed'],
+  },
+  {
+    match: /first movie ever made/i,
+    answer:
+      'The oldest surviving film is "Roundhay Garden Scene" (1888) by Louis Le Prince — about two seconds long. ' +
+      'The Lumière brothers\' 1895 screenings in Paris, including "Workers Leaving the Factory", are usually ' +
+      'counted as the birth of cinema as a public medium.',
+    related: ['first movie with sound', 'who were the Lumière brothers', 'history of cinema'],
+  },
+  {
+    match: /corporation tax/i,
+    answer:
+      'Corporation tax is the tax companies pay on their profits. In the UK the main rate is 25% (from April 2023), ' +
+      'with a 19% small profits rate for companies making under £50,000. It is paid to HMRC, usually nine months ' +
+      'and one day after the end of the accounting period.',
+    related: ['how to register for corporation tax', 'what is VAT', 'sole trader vs limited company tax'],
+  },
+]
+
 export function demoClassify(query) {
   const q = query.trim()
   const isSearch = SEARCH_PATTERNS.some((p) => p.test(q))
@@ -41,6 +103,17 @@ export function demoClassify(query) {
       goal: extractGoal(q),
       confidence: 0.85,
       answer: null,
+    }
+  }
+
+  const known = KNOWLEDGE_BASE.find((entry) => entry.match.test(q))
+  if (known) {
+    return {
+      type: 'general_search',
+      goal: null,
+      confidence: 0.95,
+      answer: known.answer,
+      related: known.related,
     }
   }
 

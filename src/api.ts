@@ -23,8 +23,8 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return res.json()
 }
 
-export function classify(query: string): Promise<ClassifyResponse> {
-  return post('/api/classify', { query })
+export function classify(query: string, model: string): Promise<ClassifyResponse> {
+  return post('/api/classify', { query, model })
 }
 
 export function generateBoard(goal: string): Promise<GenerateBoardResponse> {
