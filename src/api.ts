@@ -1,7 +1,12 @@
 import type { ClassifyResponse, GenerateBoardResponse } from './types'
 
-async function post<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(url, {
+// On the web the API is same-origin (Vite proxy in dev, Express in prod).
+// Native builds load from capacitor://localhost, so they need an absolute
+// URL to a hosted backend, provided at build time via VITE_API_BASE.
+const API_BASE: string = import.meta.env.VITE_API_BASE ?? ''
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(API_BASE + path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

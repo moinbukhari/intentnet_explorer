@@ -35,3 +35,38 @@ Optionally set `OPENAI_MODEL` (defaults to `gpt-4o-mini`).
 npm run build      # builds the frontend into dist/
 npm start          # serves dist/ and the API from one Express server on port 3001
 ```
+
+## iOS app (Capacitor)
+
+The repo contains a Capacitor iOS project in `ios/` that wraps the built web app in a WKWebView. The web UI is mobile-first, so it transfers as-is.
+
+### Prerequisites (Mac only)
+
+- Xcode (App Store) with command line tools
+- An [Apple Developer account](https://developer.apple.com) for device testing / TestFlight / App Store
+
+### Point the app at a hosted API
+
+The native app serves its UI from `capacitor://localhost`, so it cannot use the same-origin `/api` routes — the Express server must be hosted somewhere (Railway, Render, Fly, etc. — deploy this repo and run `npm start` with `OPENAI_API_KEY` set). Then build the frontend with that URL:
+
+```bash
+echo 'VITE_API_BASE=https://your-api.example.com' > .env.local
+```
+
+The server already sends permissive CORS headers for this.
+
+### Build and run
+
+```bash
+npm run ios:sync   # builds the web app and copies it into the iOS project
+npm run ios:open   # opens ios/App in Xcode
+```
+
+In Xcode: select your team under Signing & Capabilities, pick a simulator or your phone, and hit Run. For your phone over TestFlight: Product → Archive → Distribute App.
+
+App icons and splash screens are generated from `assets/` into the Xcode asset catalogs via `npm run ios:assets`.
+
+### Native details
+
+- State is mirrored to Capacitor Preferences (NSUserDefaults) on iOS, so boards survive WKWebView storage eviction.
+- App id: `com.intentnet.explorer`, name: IntentNet Explorer (see `capacitor.config.ts`).

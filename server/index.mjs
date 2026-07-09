@@ -17,6 +17,16 @@ if (apiKey) {
 const app = express()
 app.use(express.json())
 
+// The native iOS app serves its UI from capacitor://localhost and calls this
+// API cross-origin, so CORS must be open (the API holds no user data).
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  if (req.method === 'OPTIONS') return res.sendStatus(204)
+  next()
+})
+
 const CLASSIFY_SYSTEM = `You are the intent engine behind "IntentNet Explorer", a retro browser that turns actionable goals into Kanban boards.
 
 Classify the user's query as one of:
