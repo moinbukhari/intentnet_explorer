@@ -1,8 +1,7 @@
 import type { ClassifyResponse, GenerateBoardResponse } from './types'
 
-// On the web the API is same-origin (Vite proxy in dev, Express in prod).
-// Native builds load from capacitor://localhost, so they need an absolute
-// URL to a hosted backend, provided at build time via VITE_API_BASE.
+// Same-origin by default (Vite proxy in dev, Express in prod). Set
+// VITE_API_BASE at build time if the frontend is hosted apart from the API.
 const API_BASE: string = import.meta.env.VITE_API_BASE ?? ''
 
 async function post<T>(path: string, body: unknown): Promise<T> {

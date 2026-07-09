@@ -1,22 +1,6 @@
-import { Capacitor } from '@capacitor/core'
-import { Preferences } from '@capacitor/preferences'
 import type { Board, Tab } from './types'
 
 const KEY = 'intentnet-state-v1'
-const isNative = Capacitor.isNativePlatform()
-
-// iOS can evict WKWebView localStorage under storage pressure, so native
-// builds mirror state to Capacitor Preferences (backed by NSUserDefaults)
-// and restore from it on launch. On the web this is a no-op.
-export async function hydrateFromNativeStorage(): Promise<void> {
-  if (!isNative || localStorage.getItem(KEY)) return
-  try {
-    const { value } = await Preferences.get({ key: KEY })
-    if (value) localStorage.setItem(KEY, value)
-  } catch {
-    // best-effort; the app still works from a fresh state
-  }
-}
 
 export interface PersistedState {
   tabs: Tab[]
@@ -57,9 +41,7 @@ export function loadState(): PersistedState {
 
 export function saveState(state: PersistedState) {
   try {
-    const json = JSON.stringify(state)
-    localStorage.setItem(KEY, json)
-    if (isNative) void Preferences.set({ key: KEY, value: json })
+    localStorage.setItem(KEY, JSON.stringify(state))
   } catch {
     // storage full or unavailable; persistence is best-effort
   }
