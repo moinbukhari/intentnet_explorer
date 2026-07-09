@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Board, KanbanCard } from '../types'
+import type { Board, KanbanCard, KanbanColumn } from '../types'
 
 interface KanbanBoardProps {
   board: Board
@@ -15,10 +15,16 @@ const COLUMN_ICONS: Record<string, string> = {
 function Card({
   card,
   done,
+  prevColumn,
+  nextColumn,
+  onMove,
   onDragStart,
 }: {
   card: KanbanCard
   done: boolean
+  prevColumn: KanbanColumn | null
+  nextColumn: KanbanColumn | null
+  onMove: (cardId: string, toColumnId: string) => void
   onDragStart: (e: React.DragEvent, cardId: string) => void
 }) {
   return (
@@ -38,6 +44,22 @@ function Card({
           ))}
         </div>
       )}
+      <div className="kanban-card-actions">
+        <button
+          disabled={!prevColumn}
+          onClick={() => prevColumn && onMove(card.id, prevColumn.id)}
+          title={prevColumn ? `Move to ${prevColumn.title}` : undefined}
+        >
+          ◀ {prevColumn ? prevColumn.title : 'Back'}
+        </button>
+        <button
+          disabled={!nextColumn}
+          onClick={() => nextColumn && onMove(card.id, nextColumn.id)}
+          title={nextColumn ? `Move to ${nextColumn.title}` : undefined}
+        >
+          {nextColumn ? nextColumn.title : 'Done'} ▶
+        </button>
+      </div>
     </div>
   )
 }
@@ -62,12 +84,16 @@ export function KanbanBoard({ board, onMoveCard }: KanbanBoardProps) {
     }
   }
 
+  const handleMove = (cardId: string, toColumnId: string) => {
+    onMoveCard(board.id, cardId, toColumnId)
+  }
+
   return (
     <div className="kanban-page">
       <div className="kanban-header">
         <h2>📋 {board.title}</h2>
         <div className="kanban-meta">
-          <span>
+          <span className="kanban-source">
             Generated from: <i>"{board.sourceQuery}"</i>
           </span>
           <span className="kanban-progress-text">
@@ -78,9 +104,9 @@ export function KanbanBoard({ board, onMoveCard }: KanbanBoardProps) {
           </span>
         </div>
       </div>
-      <p className="kanban-hint">Drag cards between columns to track your progress. Your board is saved automatically.</p>
+      <p className="kanban-hint">Move cards between columns to track your progress. Your board is saved automatically.</p>
       <div className="kanban-columns">
-        {board.columns.map((col) => (
+        {board.columns.map((col, i) => (
           <div
             key={col.id}
             className={`kanban-column${dragOverColumn === col.id ? ' drag-over' : ''}`}
@@ -100,10 +126,18 @@ export function KanbanBoard({ board, onMoveCard }: KanbanBoardProps) {
                 const card = board.cards[cardId]
                 if (!card) return null
                 return (
-                  <Card key={cardId} card={card} done={col.id === 'done'} onDragStart={handleDragStart} />
+                  <Card
+                    key={cardId}
+                    card={card}
+                    done={col.id === 'done'}
+                    prevColumn={board.columns[i - 1] ?? null}
+                    nextColumn={board.columns[i + 1] ?? null}
+                    onMove={handleMove}
+                    onDragStart={handleDragStart}
+                  />
                 )
               })}
-              {col.cardIds.length === 0 && <div className="kanban-empty">Drop cards here</div>}
+              {col.cardIds.length === 0 && <div className="kanban-empty">No cards here yet</div>}
             </div>
           </div>
         ))}

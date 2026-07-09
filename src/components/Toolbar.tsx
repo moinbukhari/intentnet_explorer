@@ -32,10 +32,12 @@ export function Toolbar({ busy, canRefresh, onRefresh, onHome }: ToolbarProps) {
       <ToolButton icon="❌" label="Stop" disabled={!busy} />
       <ToolButton icon="🔄" label="Refresh" disabled={!canRefresh || busy} onClick={onRefresh} />
       <ToolButton icon="🏠" label="Home" disabled={busy} onClick={onHome} />
-      <span className="toolbar-separator" />
-      <ToolButton icon="🔍" label="Search" disabled />
-      <ToolButton icon="⭐" label="Favorites" disabled />
-      <ToolButton icon="🕒" label="History" disabled />
+      <span className="toolbar-extras">
+        <span className="toolbar-separator" />
+        <ToolButton icon="🔍" label="Search" disabled />
+        <ToolButton icon="⭐" label="Favorites" disabled />
+        <ToolButton icon="🕒" label="History" disabled />
+      </span>
       <span className="toolbar-spacer" />
       <div className={`throbber${busy ? ' spinning' : ''}`} title={busy ? 'Working...' : 'Idle'}>
         🌐
